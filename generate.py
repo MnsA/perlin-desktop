@@ -1,7 +1,7 @@
 from PIL import Image
 import random, math
 
-sine_wave = lambda k: math.floor(150 * math.sin(k * math.pi * 2))
+sine_wave = lambda k: math.floor(255 * math.sin(k * math.pi * 2))
 def get_color(t):
     return (sine_wave(t), sine_wave(t + 1/3), sine_wave(t + 2/3))
 
@@ -33,27 +33,28 @@ def get_noise(point, grad, grad_size):
     u = fade(point[0] * grad_size - x)
     v = fade(point[1] * grad_size - y)
     w = fade(point[2] * grad_size - z)
-    return interp(w, 
+    t = interp(w, 
         interp(v,
             interp(u, pv(point, x, y, z, grad, grad_size), pv(point, x + 1, y, z, grad, grad_size)),
             interp(u, pv(point, x, y + 1, z, grad, grad_size), pv(point, x + 1, y + 1, z, grad, grad_size))),
         interp(v,
             interp(u, pv(point, x, y, z + 1, grad, grad_size), pv(point, x + 1, y, z + 1, grad, grad_size)),
             interp(u, pv(point, x, y + 1, z + 1, grad, grad_size), pv(point, x + 1, y + 1, z + 1, grad, grad_size))))
+    return t
 
 def draw_noise(img, z, grad, grad_size):
     pixels = img.load()
     for x in range(0, width):
         for y in range(0, height):
             t = get_noise((x / width, y / height, z), grad, grad_size)
-            pixels[x, y] = get_color(interp(0.7, z, t))
+            pixels[x, y] = get_color(t + math.sin(z * math.pi * 2))
     
 width, height = 320, 180
 img = Image.new("RGB", (width, height))
 grad_size = 5
 grad = create_gradient(grad_size)
 imax = 100
-for i in range(0, imax):
+for i in range(0, imax + 1):
     z = i / imax
     draw_noise(img, z, grad, grad_size)
     print(str(i) + " / " + str(imax))
