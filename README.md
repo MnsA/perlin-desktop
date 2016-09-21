@@ -4,5 +4,5 @@ This is a simple tool to create an animated desktop background.
 or with *animate.py*.
 
 ### TODO ###
-Make the noise tileable in all dimensions.
+Make gradient resolution in z separate from resolution in x and y.
 Add some sort of interface for setting variables.
