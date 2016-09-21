@@ -13,33 +13,35 @@ def fade(t):
 
 def create_gradient(size):
     g = {}
-    for x in range(0, size):
-        for y in range(0, size):
-            for z in range(0, size):
+    for x in range(0, size[0]):
+        for y in range(0, size[1]):
+            for z in range(0, size[2]):
                 g[x, y, z] = (random.randint(-1, 1), random.randint(-1, 1), random.randint(-1, 1))
     return g
 
 def dot_product(a, b):
     return a[0] * b[0] + a[1] * b[1] + a[2] * b[2]
 
-def pv(point, x, y, z, grad, grad_size):
-    dx = point[0] * grad_size - x
-    dy = point[1] * grad_size - y
-    dz = point[2] * grad_size - z
-    return dot_product((dx, dy, dz), grad[x % grad_size, y % grad_size, z % grad_size])
+def pv(point, x, y, z, grad, gsize):
+    dx = point[0] * gsize[0] - x
+    dy = point[1] * gsize[1] - y
+    dz = point[2] * gsize[2] - z
+    return dot_product((dx, dy, dz), grad[x % gsize[0], y % gsize[1], z % gsize[2]])
 
-def get_noise(point, grad, grad_size):
-    x, y, z = tuple(map(lambda c: math.floor(c * grad_size), point))
-    u = fade(point[0] * grad_size - x)
-    v = fade(point[1] * grad_size - y)
-    w = fade(point[2] * grad_size - z)
+def get_noise(point, grad, gsize):
+    x = math.floor(point[0] * gsize[0])
+    y = math.floor(point[1] * gsize[1])
+    z = math.floor(point[2] * gsize[2])
+    u = fade(point[0] * gsize[0] - x)
+    v = fade(point[1] * gsize[1] - y)
+    w = fade(point[2] * gsize[2] - z)
     t = interp(w, 
         interp(v,
-            interp(u, pv(point, x, y, z, grad, grad_size), pv(point, x + 1, y, z, grad, grad_size)),
-            interp(u, pv(point, x, y + 1, z, grad, grad_size), pv(point, x + 1, y + 1, z, grad, grad_size))),
+            interp(u, pv(point, x, y, z, grad, gsize), pv(point, x + 1, y, z, grad, gsize)),
+            interp(u, pv(point, x, y + 1, z, grad, gsize), pv(point, x + 1, y + 1, z, grad, gsize))),
         interp(v,
-            interp(u, pv(point, x, y, z + 1, grad, grad_size), pv(point, x + 1, y, z + 1, grad, grad_size)),
-            interp(u, pv(point, x, y + 1, z + 1, grad, grad_size), pv(point, x + 1, y + 1, z + 1, grad, grad_size))))
+            interp(u, pv(point, x, y, z + 1, grad, gsize), pv(point, x + 1, y, z + 1, grad, gsize)),
+            interp(u, pv(point, x, y + 1, z + 1, grad, gsize), pv(point, x + 1, y + 1, z + 1, grad, gsize))))
     return t
 
 def draw_noise(img, z, grad, grad_size):
@@ -49,13 +51,13 @@ def draw_noise(img, z, grad, grad_size):
             t = get_noise((x / width, y / height, z), grad, grad_size)
             pixels[x, y] = get_color(t + math.sin(z * math.pi * 2))
     
-width, height = 320, 180
+width, height = 160, 90
 img = Image.new("RGB", (width, height))
-grad_size = 5
-grad = create_gradient(grad_size)
+gsize = (3, 3, 5)
+grad = create_gradient(gsize)
 imax = 100
 for i in range(0, imax + 1):
     z = i / imax
-    draw_noise(img, z, grad, grad_size)
+    draw_noise(img, z, grad, gsize)
     print(str(i) + " / " + str(imax))
     img.save("images/" + str(i) + ".bmp")
