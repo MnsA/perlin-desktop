@@ -1,8 +1,8 @@
 import ctypes
 import os, time
 
-delay = 1 / 10
-imax = 100
+delay = 1 / 20
+imax = 1000
 i = 0
 while True:
     start_clock = time.clock()

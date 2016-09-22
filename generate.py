@@ -1,9 +1,16 @@
 from PIL import Image
 import random, math
 
-sine_wave = lambda k: math.floor(255 * math.sin(k * math.pi * 2))
-def get_color(t):
-    return (sine_wave(t), sine_wave(t + 1/3), sine_wave(t + 2/3))
+def scaled_sine(t):
+    return (math.sin(t * math.pi * 2) + 1) / 2
+def scaled_cos(t):
+    return 1 - (math.cos(t * math.pi) + 1) / 2
+
+def get_color(t, z):
+    r = scaled_cos(t) * scaled_sine(z)
+    b = scaled_cos(t) * scaled_sine(z + 1/3)
+    g = scaled_cos(t) * scaled_sine(z + 2/3)
+    return tuple(map(lambda c: math.floor(c * 255), (r, g, b)))
 
 def interp(w, a, b):
     return (1 - w) * a + w * b
@@ -49,13 +56,13 @@ def draw_noise(img, z, grad, grad_size):
     for x in range(0, width):
         for y in range(0, height):
             t = get_noise((x / width, y / height, z), grad, grad_size)
-            pixels[x, y] = get_color(t + math.sin(z * math.pi * 2))
+            pixels[x, y] = get_color(t, z)
     
 width, height = 160, 90
 img = Image.new("RGB", (width, height))
-gsize = (3, 3, 5)
+gsize = (3, 3, 50)
 grad = create_gradient(gsize)
-imax = 100
+imax = 1000
 for i in range(0, imax + 1):
     z = i / imax
     draw_noise(img, z, grad, gsize)
