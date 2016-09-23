@@ -3,13 +3,11 @@ import random, math
 
 def scaled_sine(t):
     return (math.sin(t * math.pi * 2) + 1) / 2
-def scaled_cos(t):
-    return 1 - (math.cos(t * math.pi) + 1) / 2
 
 def get_color(t, z):
-    r = scaled_cos(t) * scaled_sine(z)
-    b = scaled_cos(t) * scaled_sine(z + 1/3)
-    g = scaled_cos(t) * scaled_sine(z + 2/3)
+    r = t * scaled_sine(z)
+    b = t * scaled_sine(z + 1/3)
+    g = t * scaled_sine(z + 2/3)
     return tuple(map(lambda c: math.floor(c * 255), (r, g, b)))
 
 def interp(w, a, b):
@@ -49,7 +47,7 @@ def get_noise(point, grad, gsize):
         interp(v,
             interp(u, pv(point, x, y, z + 1, grad, gsize), pv(point, x + 1, y, z + 1, grad, gsize)),
             interp(u, pv(point, x, y + 1, z + 1, grad, gsize), pv(point, x + 1, y + 1, z + 1, grad, gsize))))
-    return t
+    return (t + 1) / 2
 
 def draw_noise(img, z, grad, grad_size):
     pixels = img.load()
@@ -58,11 +56,11 @@ def draw_noise(img, z, grad, grad_size):
             t = get_noise((x / width, y / height, z), grad, grad_size)
             pixels[x, y] = get_color(t, z)
     
-width, height = 160, 90
+width, height = 320, 180
 img = Image.new("RGB", (width, height))
-gsize = (3, 3, 50)
+gsize = (5, 5, 50)
 grad = create_gradient(gsize)
-imax = 1000
+imax = 500
 for i in range(0, imax + 1):
     z = i / imax
     draw_noise(img, z, grad, gsize)
